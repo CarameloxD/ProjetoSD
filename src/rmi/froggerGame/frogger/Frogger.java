@@ -63,28 +63,31 @@ public class Frogger extends MovingEntity {
     public boolean cheating = false;
     
     public boolean hw_hasMoved = false;
+
+	private Vector2D FROGGER_START;
     
     private Main game;
     
     /**
      * Build frogger!
      */
-	public Frogger (Main g, String Frog) {
+	public Frogger (Main g, String Frog, Vector2D frogger_start) {
 		super(Main.SPRITE_SHEET + Frog);
 		game = g;
-		resetFrog();
+		this.FROGGER_START = frogger_start;
+		resetFrog(frogger_start);
 		collisionObjects.add(new CollisionObject(position));
 	}
 	
 	/**
 	 * Reset the Frogger to default state and position
 	 */
-	public void resetFrog() {
+	public void resetFrog(Vector2D froggerStart) {
 		isAlive = true;
 		isAnimating = false;
 		currentFrame = 0;
 		followObject = null;
-		position = Main.FROGGER_START;
+		position = this.FROGGER_START;
 		game.levelTimer = Main.DEFAULT_LEVEL_TIME;
 	}
 	
@@ -235,7 +238,7 @@ public class Frogger extends MovingEntity {
 	
 	/**
 	 * Effect of Heat Wave on Frogger
-	 * @param randDuration
+	 * @param
 	 */
 	public void randomJump(final int rDir) {
 		switch(rDir) {
@@ -286,7 +289,7 @@ public class Frogger extends MovingEntity {
 				game.GameLives++;
 			}
 			g.reached();
-			resetFrog();
+			resetFrog(this.FROGGER_START);
 		}
 		else {
 			setPosition(g.getPosition());
@@ -299,7 +302,7 @@ public class Frogger extends MovingEntity {
 		
 		// if dead, stay dead for 2 seconds.
 		if (!isAlive && timeOfDeath + 2000 < System.currentTimeMillis())
-				resetFrog();
+				resetFrog(this.FROGGER_START);
 		
 		updateAnimation();	
 		updateFollow(deltaMs);

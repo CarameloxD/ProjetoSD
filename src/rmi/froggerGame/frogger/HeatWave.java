@@ -71,8 +71,8 @@ public class HeatWave {
 	/**
 	 * Initiate the Heat Wave effect
 	 * 
-	 * @param f
-	 * @param temp - based on the GameTemp, this effects occurs more often
+	 * @param
+	 * @param - based on the GameTemp, this effects occurs more often
 	 */
 	public void start (Frogger f, final int GameLevel) {
 		
@@ -90,18 +90,18 @@ public class HeatWave {
 	/**
 	 * Generating particles
 	 * 
-	 * @param f
+	 * @param
 	 * @return
 	 */
-	public MovingEntity genParticles(Vector2D pos) {
+	public MovingEntity genParticles(Vector2D pos, int genP1, double genP2, double genP3) {
 		if (!isHot)
 			return null;
 		
-		if (r.nextInt(100) > 10)
+		if (genP1 > 10)
 			return null;
 		
 		// Generate particles from center of the Frogger to all directions around
-		Vector2D v = new Vector2D((r.nextDouble()-0.5)*0.1,(r.nextDouble()-0.5)*0.1);
+		Vector2D v = new Vector2D((genP2-0.5)*0.1,(genP3-0.5)*0.1);
 		
 		return new Particle(Main.SPRITE_SHEET + "#smoke_cloud", pos,v,1000);
 	}

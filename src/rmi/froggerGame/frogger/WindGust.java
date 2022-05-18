@@ -97,20 +97,20 @@ public class WindGust {
 	 * @param level
 	 * @return - a wind particle object or null
 	 */
-	public MovingEntity genParticles(final int level) {
+	public MovingEntity genParticles(final int level, int genP1, int genP2, double genP3, double genP4) {
 
 		if (!isWindy)
 			return null;
 		
 		// Lower game level has less wind strength and should be less visible
-		if (r.nextInt(100) > level*10)
+		if (genP1 > level*10)
 			return null;
 		
-		int yPos = r.nextInt(13*32)+32;         // visible area in y-axis of the game
+		int yPos = genP2+32;         // visible area in y-axis of the game
 		Vector2D pos = new Vector2D(0, yPos);   // start behind left side
 		
 		// Build somewhat random velocity vector for each wind particle, looks cool
-		Vector2D v = new Vector2D(0.2+r.nextDouble(),(r.nextDouble()-0.5)*0.1); 
+		Vector2D v = new Vector2D(0.2+genP3,(genP4-0.5)*0.1);
 		return new Particle(Main.SPRITE_SHEET + "#white_dot", pos,v);
 	}
 	

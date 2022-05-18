@@ -8,6 +8,9 @@
  */
 package rmi.froggerGame.server;
 
+import rmi.froggerGame.frogger.Frogger;
+import rmi.froggerGame.frogger.MovingEntity;
+
 import java.io.Serializable;
 
 /**
@@ -51,4 +54,5 @@ public class State implements Serializable {
     public void setInfo(String m){
         this.msg = m;
     }
+
 }

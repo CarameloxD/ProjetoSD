@@ -1,7 +1,6 @@
 package rmi.froggerGame.server;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * @author rmoreira
@@ -14,7 +13,7 @@ public class Game implements Serializable {
     private SubjectRI subjectRI;
 
     public Game(String d, SubjectRI subjectRI) {
-        this.id++;
+        id++;
         this.difficulty = d;
         this.nplayers = 0;
         this.subjectRI = subjectRI;

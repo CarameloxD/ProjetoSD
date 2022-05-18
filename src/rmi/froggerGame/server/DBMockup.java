@@ -102,7 +102,6 @@ public class DBMockup {
             Game game = (Game) games.get(i);
             System.out.println("DB - select(): game[" + i + "] = " + game.getNplayers() + ", " + game.getDifficulty());
             if (game.getId() == idGame) {
-                game.setNplayers(game.getNplayers() + 1);
                 System.out.println("DB - select(): add game[" + i + "] = " + game.getNplayers() + ", " + game.getDifficulty());
                 return game;
             }

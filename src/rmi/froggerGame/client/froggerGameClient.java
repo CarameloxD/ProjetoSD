@@ -2,6 +2,7 @@ package rmi.froggerGame.client;
 
 import rmi.froggerGame.frogger.Main;
 import rmi.froggerGame.server.Game;
+import rmi.froggerGame.server.State;
 import rmi.froggerGame.server.froggerGameFactoryRI;
 import rmi.froggerGame.server.froggerGameSessionRI;
 import rmi.util.rmisetup.SetupContextRMI;
@@ -84,14 +85,6 @@ public class froggerGameClient {
             }
             menuGame(froggerGameSessionRI);
 
-            /*Book[] books;
-            books = froggerGameSessionRI.search("principles", "Tanenbaum");
-            froggerGameSessionRI.logout();
-
-            for (Book b: books) {
-                System.out.println(b);
-            }*/
-
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "going MAIL_TO_ADDR finish, bye. ;)");
         } catch (RemoteException ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
@@ -134,17 +127,19 @@ public class froggerGameClient {
         ObserverRI observerRI;
         switch (op.nextInt()) {
             case 1:
-                System.out.print("\nDifficulty: (Easy/Normal/Hard)");
+                System.out.print("\nDifficulty (Easy/Normal/Hard): ");
                 observerRI = new ObserverImpl(e);
                 lowerCaseDifficulty = difficulty.next().toLowerCase();
                 int dificuldade = transformDifficulty(lowerCaseDifficulty);
                 if (dificuldade == 0) return;
                 game1 = froggerGameSessionRI.createGame(lowerCaseDifficulty, observerRI);
-                f = new Main(dificuldade, observerRI);
                 observerRI.setSubjectRI(game1.getSubjectRI());
-                observerRI.setMain(f);
+                while(game1.getNplayers() < 2){
+                    State state = observerRI.getSubjectRI().getState();
+                    if (!state.getInfo().equals("")) game1.setNplayers(Integer.parseInt(state.getInfo()));
+                }
+                f = new Main(dificuldade, observerRI);
                 f.run();
-
                 froggerGameSessionRI.exitGame(game1.getId(), observerRI);
                 menuGame(froggerGameSessionRI);
                 break;
@@ -174,9 +169,9 @@ public class froggerGameClient {
                 int gameDifficulty = transformDifficulty(game1.getDifficulty());
                 if (gameDifficulty == 0) return;
                 observerRI.setSubjectRI(game1.getSubjectRI());
+                State state = new State(observerRI.getId(), String.valueOf(game1.getNplayers()));
+                observerRI.getSubjectRI().setState(state);
                 f = new Main(gameDifficulty, observerRI);
-                observerRI.setSubjectRI(game1.getSubjectRI());
-                observerRI.setMain(f);
                 f.run();
                 froggerGameSessionRI.exitGame(game1.getId(), observerRI);
                 menuGame(froggerGameSessionRI);

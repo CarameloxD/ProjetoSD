@@ -8,7 +8,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface ObserverRI extends Remote {
-    void update() throws RemoteException;
+    void update(State state) throws RemoteException;
     public void setSubjectRI(SubjectRI subjectRI) throws RemoteException;
     public void setMain(Main main) throws RemoteException;
     public String getId() throws RemoteException;

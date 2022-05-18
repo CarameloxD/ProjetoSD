@@ -22,9 +22,15 @@ public class ObserverImpl extends UnicastRemoteObject implements ObserverRI {
     }
 
     @Override
-    public void update() throws RemoteException{
-        this.lastObserverState = subjectRI.getState();
-        this.main.froggerHandler();
+    public void update(State state) throws RemoteException {
+        synchronized (this) {
+            this.lastObserverState = state;
+            if (state.getInfo().contains("upPressed") || state.getInfo().contains("downPressed") || state.getInfo().contains("rightPressed") || state.getInfo().contains("leftPressed")) {
+                this.main.froggerHandler(state);
+            } else if (state.getId().equals("cycleTraffic")) {
+                this.main.cycleTraffic(5, state);
+            }
+        }
     }
 
     public void setSubjectRI(SubjectRI subjectRI) throws RemoteException {
@@ -36,23 +42,23 @@ public class ObserverImpl extends UnicastRemoteObject implements ObserverRI {
         this.main = main;
     }
 
-    public String getId() throws RemoteException{
+    public String getId() throws RemoteException {
         return id;
     }
 
-    public void setId(String id) throws RemoteException{
+    public void setId(String id) throws RemoteException {
         this.id = id;
     }
 
-    public void setLastObserverState(State lastObserverState) throws RemoteException{
+    public void setLastObserverState(State lastObserverState) throws RemoteException {
         this.lastObserverState = lastObserverState;
     }
 
-    public SubjectRI getSubjectRI() throws RemoteException{
+    public SubjectRI getSubjectRI() throws RemoteException {
         return subjectRI;
     }
 
-    public Main getMain() throws RemoteException{
+    public Main getMain() throws RemoteException {
         return main;
     }
 }

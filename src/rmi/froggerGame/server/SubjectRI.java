@@ -11,6 +11,6 @@ public interface SubjectRI  extends Remote {
     void detach(ObserverRI obsRI) throws RemoteException;
     State getState() throws RemoteException;
     void setState(State state) throws RemoteException;
-    public void notifyAllObservers() throws RemoteException;
+    public void notifyAllObservers(State state) throws RemoteException;
     public ArrayList<ObserverRI> getObservers() throws RemoteException;
 }
