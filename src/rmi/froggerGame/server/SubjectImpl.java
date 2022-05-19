@@ -2,6 +2,7 @@ package rmi.froggerGame.server;
 
 import rmi.froggerGame.client.ObserverRI;
 
+import java.awt.image.renderable.RenderableImage;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -52,5 +53,14 @@ public class SubjectImpl extends UnicastRemoteObject implements SubjectRI {
 
     public ArrayList<ObserverRI> getObservers() throws RemoteException{
         return observers;
+    }
+
+    public int findObserverArrayPosition(ObserverRI observer) throws RemoteException{
+        for (int i = 0; i< observers.size(); i++){
+            if(observer.equals(observers.get(i))){
+                return i;
+            }
+        }
+        return -1;
     }
 }

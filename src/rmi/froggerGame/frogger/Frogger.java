@@ -67,14 +67,20 @@ public class Frogger extends MovingEntity {
 	private Vector2D FROGGER_START;
     
     private Main game;
+
+	private int player;
+
+	private int FROGGER_LIVES;
     
     /**
      * Build frogger!
      */
-	public Frogger (Main g, String Frog, Vector2D frogger_start) {
+	public Frogger (Main g, String Frog, Vector2D frogger_start, int player) {
 		super(Main.SPRITE_SHEET + Frog);
 		game = g;
 		this.FROGGER_START = frogger_start;
+		this.player = player;
+		this.FROGGER_LIVES = g.GameLives;
 		resetFrog(frogger_start);
 		collisionObjects.add(new CollisionObject(position));
 	}

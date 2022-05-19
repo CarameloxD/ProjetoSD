@@ -111,7 +111,6 @@ public class Main extends StaticScreenGame {
     public Main(int difficulty, ObserverRI observer) throws RemoteException {
 
         super(WORLD_WIDTH, WORLD_HEIGHT, false);
-
         observer.setMain(this);
         observerRI = observer;
 
@@ -130,12 +129,12 @@ public class Main extends StaticScreenGame {
         PaintableCanvas.loadDefaultFrames("col", 30, 30, 2, JIGSHAPE.RECTANGLE, null);
         PaintableCanvas.loadDefaultFrames("colSmall", 4, 4, 2, JIGSHAPE.RECTANGLE, null);
 
-        frog = new Frogger(this, "#frog", FROGGER_START);
-        frogP2 = new Frogger(this, "#frogP2", FROGGER_START_P2);
+        frog = new Frogger(this, "#frog", FROGGER_START, 0);
+        frogP2 = new Frogger(this, "#frogP2", FROGGER_START_P2, 1);
         frogColP2 = new FroggerCollisionDetection(frogP2);
         frogCol = new FroggerCollisionDetection(frog);
         audiofx = new AudioEfx(frogCol, frog);
-        audiofxP2 = new AudioEfx(frogColP2, frog);
+        audiofxP2 = new AudioEfx(frogColP2, frogP2);
         ui = new FroggerUI(this);
         wind = new WindGust();
         hwave = new HeatWave();
@@ -145,7 +144,7 @@ public class Main extends StaticScreenGame {
         particleLayer = new AbstractBodyLayer.IterativeUpdate<MovingEntity>();
 
         dificuldade = difficulty;
-        if (!observerRI.getId().equals("joao")) {
+        if (observerRI.getId() != 0) {
             while (!observerRI.getSubjectRI().getState().getInfo().equals("initialize")) {
                 observerRI.getSubjectRI().getState();
                 System.out.println("OBS = " + observerRI.getId() + " Entrou aqui");
@@ -200,8 +199,8 @@ public class Main extends StaticScreenGame {
             movingObjectsLayer.add(g);
         }
 
-        if (observerRI.getId().equals("joao")) {
-            State s = new State(observerRI.getId(), "initialize");
+        if (observerRI.getId() == 0) {
+            State s = new State(String.valueOf(observerRI.getId()), "initialize");
             observerRI.getSubjectRI().setState(s);
         }
 
@@ -400,27 +399,27 @@ public class Main extends StaticScreenGame {
     public synchronized void froggerHandler(State state) throws RemoteException {
         switch (state.getInfo()) {
             case "upPressed":
-                if (state.getId().equals("joao"))
+                if (state.getId().equals("0"))
                     frog.moveUp();
-                else if (state.getId().equals("guest"))
+                else if (state.getId().equals("1"))
                     frogP2.moveUp();
                 break;
             case "downPressed":
-                if (state.getId().equals("joao"))
+                if (state.getId().equals("0"))
                     frog.moveDown();
-                else if (state.getId().equals("guest"))
+                else if (state.getId().equals("1"))
                     frogP2.moveDown();
                 break;
             case "rightPressed":
-                if (state.getId().equals("joao"))
+                if (state.getId().equals("0"))
                     frog.moveRight();
-                else if (state.getId().equals("guest"))
+                else if (state.getId().equals("1"))
                     frogP2.moveRight();
                 break;
             case "leftPressed":
-                if (state.getId().equals("joao"))
+                if (state.getId().equals("0"))
                     frog.moveLeft();
-                else if (state.getId().equals("guest"))
+                else if (state.getId().equals("1"))
                     frogP2.moveLeft();
                 break;
         }
@@ -539,9 +538,11 @@ public class Main extends StaticScreenGame {
                     synchronized (this){particleLayer.clear();}
                 }
 
-                if (GameLives < 1) {
-                    GameState = GAME_OVER;
-                }
+                /*
+                    if (GameLives < 1) {
+                        GameState = GAME_OVER;
+                    }
+                */
 
                 break;
 
