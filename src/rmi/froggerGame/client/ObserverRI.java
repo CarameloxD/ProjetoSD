@@ -11,8 +11,8 @@ public interface ObserverRI extends Remote {
     void update(State state) throws RemoteException;
     public void setSubjectRI(SubjectRI subjectRI) throws RemoteException;
     public void setMain(Main main) throws RemoteException;
-    public String getId() throws RemoteException;
-    public void setId(String id) throws RemoteException;
+    public int getId() throws RemoteException;
+    public void setId(int id) throws RemoteException;
     public void setLastObserverState(State lastObserverState) throws RemoteException;
     public SubjectRI getSubjectRI() throws RemoteException;
     public Main getMain() throws RemoteException;

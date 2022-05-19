@@ -117,6 +117,11 @@ public class FroggerUI implements ViewableLayer {
 		}
 	}
 
+	@Override
+	public void render(RenderingContext rc) {
+
+	}
+
 	public void update(long deltaMs) {
 	}
 

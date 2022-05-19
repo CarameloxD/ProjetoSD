@@ -128,16 +128,18 @@ public class froggerGameClient {
         switch (op.nextInt()) {
             case 1:
                 System.out.print("\nDifficulty (Easy/Normal/Hard): ");
-                observerRI = new ObserverImpl(e);
+                observerRI = new ObserverImpl();
                 lowerCaseDifficulty = difficulty.next().toLowerCase();
                 int dificuldade = transformDifficulty(lowerCaseDifficulty);
                 if (dificuldade == 0) return;
                 game1 = froggerGameSessionRI.createGame(lowerCaseDifficulty, observerRI);
                 observerRI.setSubjectRI(game1.getSubjectRI());
+                observerRI.setId(observerRI.getSubjectRI().findObserverArrayPosition(observerRI));
                 while(game1.getNplayers() < 2){
                     State state = observerRI.getSubjectRI().getState();
                     if (!state.getInfo().equals("")) game1.setNplayers(Integer.parseInt(state.getInfo()));
                 }
+                System.out.println(observerRI.getSubjectRI().getObservers().size());
                 f = new Main(dificuldade, observerRI);
                 f.run();
                 froggerGameSessionRI.exitGame(game1.getId(), observerRI);
@@ -164,12 +166,13 @@ public class froggerGameClient {
                     System.out.println(g);
                 }
                 System.out.print("\nChoose one game by id: ");
-                observerRI = new ObserverImpl(e);
+                observerRI = new ObserverImpl();
                 game1 = froggerGameSessionRI.joinGame(game.nextInt(), observerRI);
                 int gameDifficulty = transformDifficulty(game1.getDifficulty());
                 if (gameDifficulty == 0) return;
                 observerRI.setSubjectRI(game1.getSubjectRI());
-                State state = new State(observerRI.getId(), String.valueOf(game1.getNplayers()));
+                observerRI.setId(observerRI.getSubjectRI().findObserverArrayPosition(observerRI));
+                State state = new State(String.valueOf(observerRI.getId()), String.valueOf(game1.getNplayers()));
                 observerRI.getSubjectRI().setState(state);
                 f = new Main(gameDifficulty, observerRI);
                 f.run();

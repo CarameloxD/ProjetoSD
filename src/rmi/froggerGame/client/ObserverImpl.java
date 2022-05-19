@@ -8,13 +8,13 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 public class ObserverImpl extends UnicastRemoteObject implements ObserverRI {
-    private String id;
+    private int id;
     private State lastObserverState;
     private SubjectRI subjectRI;
     private Main main;
 
-    protected ObserverImpl(String id) throws RemoteException {
-        this.id = id;
+    protected ObserverImpl() throws RemoteException {
+
     }
 
     public State getLastObserverState() {
@@ -42,11 +42,11 @@ public class ObserverImpl extends UnicastRemoteObject implements ObserverRI {
         this.main = main;
     }
 
-    public String getId() throws RemoteException {
+    public int getId() throws RemoteException {
         return id;
     }
 
-    public void setId(String id) throws RemoteException {
+    public void setId(int id) throws RemoteException {
         this.id = id;
     }
 

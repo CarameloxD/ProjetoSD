@@ -268,7 +268,7 @@ public class Frogger extends MovingEntity {
 		    followObject = null;
 		    isAlive = false;
 		    currentFrame = 4;	// dead sprite   
-		    game.GameLives--;
+		    this.FROGGER_LIVES--;
 		    hw_hasMoved = true;
 		}
 		
@@ -286,7 +286,7 @@ public class Frogger extends MovingEntity {
 			game.GameScore += game.levelTimer;
 			if (g.isBonus) {
 				AudioEfx.bonus.play(0.2);
-				game.GameLives++;
+				this.FROGGER_LIVES++;
 			}
 			g.reached();
 			resetFrog(this.FROGGER_START);
@@ -297,7 +297,7 @@ public class Frogger extends MovingEntity {
 	}
 	
 	public void update(final long deltaMs) {
-		if (game.GameLives <= 0)
+		if (this.FROGGER_LIVES <= 0)
 			return;
 		
 		// if dead, stay dead for 2 seconds.
@@ -317,5 +317,13 @@ public class Frogger extends MovingEntity {
 		
 		if (game.levelTimer <= 0)
 			die();
+	}
+
+	public int getFROGGER_LIVES() {
+		return FROGGER_LIVES;
+	}
+
+	public void setFROGGER_LIVES(int FROGGER_LIVES) {
+		this.FROGGER_LIVES = FROGGER_LIVES;
 	}
 }

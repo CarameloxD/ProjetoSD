@@ -369,19 +369,19 @@ public class Main extends StaticScreenGame {
         if (listenInput) {
             State state;
             if (downPressed) {
-                state = new State(this.observerRI.getId(), "downPressed");
+                state = new State(String.valueOf(this.observerRI.getId()), "downPressed");
                 this.observerRI.getSubjectRI().setState(state);
             }
             if (upPressed) {
-                state = new State(this.observerRI.getId(), "upPressed");
+                state = new State(String.valueOf(this.observerRI.getId()), "upPressed");
                 this.observerRI.getSubjectRI().setState(state);
             }
             if (leftPressed) {
-                state = new State(this.observerRI.getId(), "leftPressed");
+                state = new State(String.valueOf(this.observerRI.getId()), "leftPressed");
                 this.observerRI.getSubjectRI().setState(state);
             }
             if (rightPressed) {
-                state = new State(this.observerRI.getId(), "rightPressed");
+                state = new State(String.valueOf(this.observerRI.getId()), "rightPressed");
                 this.observerRI.getSubjectRI().setState(state);
             }
             if (keyPressed)
@@ -495,7 +495,7 @@ public class Main extends StaticScreenGame {
                 ui.update(deltaMs);
 
                 try {
-                    if (observerRI.getId().equals("joao")) cycleTrafficState();
+                    if (observerRI.getId() == 0) cycleTrafficState();
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -555,7 +555,7 @@ public class Main extends StaticScreenGame {
                     e.printStackTrace();
                 }
                 try {
-                    if (observerRI.getId().equals("joao")) {
+                    if (observerRI.getId() == 0) {
                         cycleTrafficState();
                     }
                 } catch (RemoteException e) {
@@ -599,7 +599,16 @@ public class Main extends StaticScreenGame {
                 }
 
                 synchronized (this){particleLayer.render(rc);}
-                ui.render(rc);
+                try {
+                    if (this.observerRI.getId() == 0){
+                        ui.render(rc, frog.getFROGGER_LIVES());
+                    } else if (this.observerRI.getId() == 1){
+                        ui.render(rc, frogP2.getFROGGER_LIVES());
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
                 break;
 
             case GAME_OVER:
@@ -609,7 +618,15 @@ public class Main extends StaticScreenGame {
                 synchronized (this) {
                     movingObjectsLayer.render(rc);
                 }
-                ui.render(rc);
+                try {
+                    if (this.observerRI.getId() == 0){
+                        ui.render(rc, frog.getFROGGER_LIVES());
+                    } else if (this.observerRI.getId() == 1){
+                        ui.render(rc, frogP2.getFROGGER_LIVES());
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 break;
         }
     }
