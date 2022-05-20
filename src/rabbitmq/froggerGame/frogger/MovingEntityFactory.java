@@ -23,7 +23,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package rmi.froggerGame.frogger;
+package rabbitmq.froggerGame.frogger;
 
 import jig.engine.util.Vector2D;
 

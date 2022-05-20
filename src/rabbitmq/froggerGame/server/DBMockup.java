@@ -1,4 +1,4 @@
-package rmi.froggerGame.server;
+package rabbitmq.froggerGame.server;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -62,8 +62,8 @@ public class DBMockup {
      *
      * @param d difficulty
      */
-    public Game insert(String d, SubjectRI s) {
-        Game game = new Game(d, s);
+    public Game insert(String d) {
+        Game game = new Game(d);
         games.add(game);
         return game;
     }
@@ -101,6 +101,7 @@ public class DBMockup {
             System.out.println("DB - select(): game[" + i + "] = " + game.getNplayers() + ", " + game.getDifficulty());
             if (game.getId() == idGame) {
                 System.out.println("DB - select(): add game[" + i + "] = " + game.getNplayers() + ", " + game.getDifficulty());
+                game.setNplayers(game.getNplayers() + 1);
                 return game;
             }
         }

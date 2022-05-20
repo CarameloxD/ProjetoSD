@@ -2,7 +2,6 @@ package rmi.froggerGame.server;
 
 import rmi.froggerGame.client.ObserverRI;
 
-import java.awt.image.renderable.RenderableImage;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;

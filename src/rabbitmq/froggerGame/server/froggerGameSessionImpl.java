@@ -1,6 +1,4 @@
-package rmi.froggerGame.server;
-
-import rmi.froggerGame.client.ObserverRI;
+package rabbitmq.froggerGame.server;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -15,26 +13,18 @@ public class froggerGameSessionImpl extends UnicastRemoteObject implements frogg
     }
 
     @Override
-    public Game createGame(String difficulty, ObserverRI observer) throws RemoteException {
-        SubjectRI subjectRI = new SubjectImpl();
-        Game game = froggerGamefactoryimpl.db.insert(difficulty, subjectRI);
-        game.getSubjectRI().attach(observer);
-        game.setNplayers(game.getNplayers() + 1);
-        return game;
+    public Game createGame(String difficulty) throws RemoteException {
+        return froggerGamefactoryimpl.db.insert(difficulty);
     }
 
     @Override
-    public Game joinGame(int idGame, ObserverRI observer) throws RemoteException {
-        Game game = froggerGamefactoryimpl.db.selectById(idGame);
-        game.getSubjectRI().attach(observer);
-        game.setNplayers(game.getNplayers() + 1);
-        return game;
+    public Game joinGame(int idGame) throws RemoteException {
+        return froggerGamefactoryimpl.db.selectById(idGame);
     }
 
     @Override
-    public void exitGame(int idGame, ObserverRI observer) throws RemoteException {
+    public void exitGame(int idGame) throws RemoteException {
         Game game = froggerGamefactoryimpl.db.selectById(idGame);
-        game.getSubjectRI().detach(observer);
         game.setNplayers(game.getNplayers() - 1);
     }
 
