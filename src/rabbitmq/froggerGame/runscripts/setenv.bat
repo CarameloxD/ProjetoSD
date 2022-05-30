@@ -39,6 +39,8 @@
 @Set PRODUCER_CLASS_PREFIX=EmitLog
 @Set CONSUMER_CLASS_PREFIX=ReceiveLogs
 @Set OBSERVER_CLASS_PREFIX=ObserverGuiClient
+@Set SERVER_CLASS_PREFIX=ServerGui
+
 
 @REM ==== NETWORK STUFF ====
 @Set BROKER_HOST=localhost

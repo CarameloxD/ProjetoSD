@@ -1,29 +1,28 @@
-package rabbitmq.froggerGame.client;
+package rabbitmq.froggerGame.server;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.*;
+import rabbitmq.froggerGame.client.Observer;
+import rabbitmq.froggerGame.frogger.Car;
 import rabbitmq.froggerGame.frogger.Main;
 import rabbitmq.util.RabbitUtils;
+import rmi.froggerGame.client.ObserverRI;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * @author rui
- */
-public class Observer {
-
+public class Server {
     //Reference for gui
-    private final Main main;
 
     //Preferences for exchange...
     private final Channel channelToRabbitMq;
     private final String exchangeName;
     private final BuiltinExchangeType exchangeType;
+    //private final String[] exchangeBindingKeys;
     private final String[] exchangeBindingKeys;
     private final String messageFormat;
 
@@ -31,30 +30,26 @@ public class Observer {
     private String receivedMessage;
 
     private final String game;
-    private final String username;
     private final String cycleTraffic;
     private final String froggerMoves;
 
-    /**
-     * @param main
-     */
-    public Observer(Main main, String host, int port, String user, String pass, String username, String game, String cycleTraffic, String froggerMoves, String exchangeName, BuiltinExchangeType exchangeType, String messageFormat) throws IOException, TimeoutException {
-        this.main = main;
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, " going to attach observer to host: " + host + "...");
+    private int nplayers;
+
+    public Server(String host, int port, String user, String pass, String game, String cycleTraffic, String froggerMoves, String exchangeName, BuiltinExchangeType exchangeType, String messageFormat) throws IOException, TimeoutException {
+
+        this.exchangeName = exchangeName;
+        this.exchangeType = exchangeType;
 
         Connection connection = RabbitUtils.newConnection2Server(host, port, user, pass);
         this.channelToRabbitMq = RabbitUtils.createChannel2Server(connection);
 
-        this.exchangeName = exchangeName;
-        this.exchangeType = exchangeType;
         //String[] bindingKeys={"",""};
         //this.exchangeBindingKeys=bindingKeys;
         this.messageFormat = messageFormat;
-
-        this.username = username;
         this.game = game;
         this.cycleTraffic = cycleTraffic;
         this.froggerMoves = froggerMoves;
+        this.nplayers = 0;
 
         String[] bindingKeys = {};
         this.exchangeBindingKeys = bindingKeys;
@@ -62,12 +57,10 @@ public class Observer {
         attachConsumerToChannelExchangeWithKey();
     }
 
-    /**
-     * Binds the channel to given exchange name and type.
-     */
     private void bindExchangeToChannelRabbitMQ() throws IOException {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Declaring Exchange '" + this.exchangeName + "' with type " + this.exchangeType);
-        //this.channelToRabbitMq.exchangeDeclare(exchangeName, exchangeType);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Declaring Exchange '" + this.exchangeName + "Server" + "' with type " + this.exchangeType);
+        this.channelToRabbitMq.exchangeDeclare(exchangeName + "Server", exchangeType);
+        this.channelToRabbitMq.exchangeDeclare(exchangeName, BuiltinExchangeType.FANOUT);
     }
 
     /**
@@ -77,7 +70,7 @@ public class Observer {
         try {
             String queueName = this.channelToRabbitMq.queueDeclare().getQueue();
 
-            this.channelToRabbitMq.queueBind(queueName, exchangeName + "Server", "");
+            this.channelToRabbitMq.queueBind(queueName, exchangeName, "");
 
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, " Created consumerChannel bound to Exchange " + this.exchangeName + "...");
 
@@ -86,19 +79,18 @@ public class Observer {
                 void handle(String tag, Delivery delivery) throws IOException; */
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), "UTF-8");
-
+                String[] msg = message.split(" ");
                 //Store the received message
                 setReceivedMessage(message);
                 //System.out.println(" [x] Consumer Tag [" + consumerTag + "] - Received '" + message + "'");
-                if (message.contains("Pressed")) {
-                    this.main.froggerHandler();
-                }
-                //this.gui.updateTextArea();
+               if (msg[0].equals("0") || msg[0].equals("1")) {
+                    this.sendMessage(message);
+               } else if (message.contains("initialize")) addnPlayers();
+               //this.gui.updateTextArea();
             };
             CancelCallback cancelCallback = consumerTag -> {
                 System.out.println(" [x] Consumer Tag [" + consumerTag + "] - Cancel Callback invoked!");
             };
-
             this.channelToRabbitMq.basicConsume(queueName, true, deliverCallback, cancelCallback);
         } catch (Exception e) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.toString());
@@ -115,7 +107,7 @@ public class Observer {
         //RoutingKey will be ignored by FANOUT exchange
         BasicProperties prop = MessageProperties.PERSISTENT_TEXT_PLAIN;
         String[] msg = msgToSend.split(" ");
-        channelToRabbitMq.basicPublish(exchangeName, "", null, msgToSend.getBytes("UTF-8"));
+        channelToRabbitMq.basicPublish(exchangeName + "Server", "", null, msgToSend.getBytes("UTF-8"));
     }
 
     /**
@@ -132,11 +124,8 @@ public class Observer {
         this.receivedMessage = receivedMessage;
     }
 
-    public String getGame() {
-        return game;
-    }
-
-    public String getUsername() {
-        return username;
+    public void addnPlayers() throws IOException {
+        this.nplayers++;
+        this.sendMessage(String.valueOf(nplayers));
     }
 }

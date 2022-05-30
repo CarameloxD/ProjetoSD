@@ -277,7 +277,6 @@ public class Frogger extends MovingEntity {
 		    this.FROGGER_LIVES--;
 		    hw_hasMoved = true;
 		}
-		
 		timeOfDeath = getTime();
 		game.levelTimer = Main.DEFAULT_LEVEL_TIME;
 	}

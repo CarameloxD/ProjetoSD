@@ -29,8 +29,11 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
+import com.rabbitmq.client.AMQP;
 import jig.engine.ImageResource;
 import jig.engine.PaintableCanvas;
 import jig.engine.RenderingContext;
@@ -55,31 +58,31 @@ public class Main extends StaticScreenGame {
     static final int STARTING_LEVEL = 1;
     static final int DEFAULT_LEVEL_TIME = 60;
 
-    private volatile FroggerCollisionDetection frogCol;
-    private volatile FroggerCollisionDetection frogColP2;
-    private volatile Frogger frog;
-    private volatile Frogger frogP2;
+    private FroggerCollisionDetection frogCol;
+    private FroggerCollisionDetection frogColP2;
+    private Frogger frog;
+    private Frogger frogP2;
     private AudioEfx audiofx;
     private AudioEfx audiofxP2;
-    private volatile FroggerUI ui;
-    private volatile WindGust wind;
-    private volatile HeatWave hwave;
+    private FroggerUI ui;
+    private WindGust wind;
+    private HeatWave hwave;
     private GoalManager goalmanager;
 
-    private volatile AbstractBodyLayer<MovingEntity> movingObjectsLayer;
-    private volatile AbstractBodyLayer<MovingEntity> particleLayer;
+    private AbstractBodyLayer<MovingEntity> movingObjectsLayer;
+    private AbstractBodyLayer<MovingEntity> particleLayer;
 
-    private volatile MovingEntityFactory roadLine1;
-    private volatile MovingEntityFactory roadLine2;
-    private volatile MovingEntityFactory roadLine3;
-    private volatile MovingEntityFactory roadLine4;
-    private volatile MovingEntityFactory roadLine5;
+    private MovingEntityFactory roadLine1;
+    private MovingEntityFactory roadLine2;
+    private MovingEntityFactory roadLine3;
+    private MovingEntityFactory roadLine4;
+    private MovingEntityFactory roadLine5;
 
-    private volatile MovingEntityFactory riverLine1;
-    private volatile MovingEntityFactory riverLine2;
-    private volatile MovingEntityFactory riverLine3;
-    private volatile MovingEntityFactory riverLine4;
-    private volatile MovingEntityFactory riverLine5;
+    private MovingEntityFactory riverLine1;
+    private MovingEntityFactory riverLine2;
+    private MovingEntityFactory riverLine3;
+    private MovingEntityFactory riverLine4;
+    private MovingEntityFactory riverLine5;
 
     private ImageBackgroundLayer backgroundLayer;
 
@@ -103,12 +106,11 @@ public class Main extends StaticScreenGame {
 
     private Observer observer;
     private int dificuldade = 0;
-    private MovingEntity c;
 
     /**
      * Initialize game objects
      */
-    public Main(int difficulty) throws RemoteException {
+    public Main(int difficulty) throws IOException {
 
         super(WORLD_WIDTH, WORLD_HEIGHT, false);
 
@@ -140,11 +142,13 @@ public class Main extends StaticScreenGame {
         particleLayer = new AbstractBodyLayer.IterativeUpdate<MovingEntity>();
 
         dificuldade = difficulty;
-        synchronized (this) {initializeLevel(1);}
+        synchronized (this) {
+            initializeLevel(1);
+        }
     }
 
 
-    public synchronized void initializeLevel(int level) throws RemoteException {
+    public synchronized void initializeLevel(int level) {
         /* dV is the velocity multiplier for all moving objects at the current game level */
         double dV = level * 0.05 + 0.5; //+ dificuldade;
 
@@ -194,123 +198,79 @@ public class Main extends StaticScreenGame {
 
     }
 
-    public void cycleTrafficState() throws IOException {
-        Random r = new Random(System.currentTimeMillis());
-        int buildvehicle = r.nextInt(100);
-        int buildbasic = r.nextInt(100);
-        int car = r.nextInt(Car.TYPES);
-        int croc = r.nextInt(100);
-        int turtle = r.nextInt(100);
-        int turtleif = r.nextInt(100);
-        int genP1 = r.nextInt(100);
-        int genP2 = r.nextInt(13 * 32);
-        double genP3 = r.nextDouble();
-        double genP4 = r.nextDouble();
-        int genP5 = r.nextInt(100);
-        double genP6 = r.nextDouble();
-        double genP7 = r.nextDouble();
-        observer.sendMessage("cycleTraffic" + " " + buildvehicle + " " + buildbasic + " " + car + " " + croc + " " + turtle + " " + turtleif + " " + genP1 + " " + genP2 + " " + genP3 + " " + genP4 + " " + genP5 + " " + genP6 + " " + genP7);
-    }
-
     /**
      * Populate movingObjectLayer with a cycle of cars/trucks, moving tree logs, etc
      *
      * @param deltaMs
      */
-    public void cycleTraffic(long deltaMs) throws RemoteException {
+    public void cycleTraffic(long deltaMs) {
         MovingEntity m;
-        String[] st = observer.getReceivedMessage().split(" ");
-        ArrayList<Integer> args = new ArrayList<>();
-        ArrayList<Double> argsDouble = new ArrayList<>();
-        if (st[0].equals("cycleTraffic")) {
-            for (int i = 0; i < st.length; i++) {
-                if (i == 9 || i == 10 || i == 12 || i == 13) {
-                    argsDouble.add(Double.parseDouble(st[i]));
-                } else {
-                    args.add(Integer.parseInt(st[i]));
-                }
-            }
-        } else return;
-        System.out.println(roadLine1);
 
-        /* Road traffic updates */
         roadLine1.update(deltaMs);
-        if ((m = roadLine1.buildVehicle(args.get(1), args.get(2), args.get(3))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = roadLine1.buildVehicle(40)) != null)
+            movingObjectsLayer.add(m);
+
 
         roadLine2.update(deltaMs);
-        if ((m = roadLine2.buildVehicle(args.get(1), args.get(2), args.get(3))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = roadLine2.buildVehicle(50)) != null)
+            movingObjectsLayer.add(m);
+
 
         roadLine3.update(deltaMs);
-        if ((m = roadLine3.buildVehicle(args.get(1), args.get(2), args.get(3))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = roadLine3.buildVehicle(30)) != null)
+            movingObjectsLayer.add(m);
+
 
         roadLine4.update(deltaMs);
-        if ((m = roadLine4.buildVehicle(args.get(1), args.get(2), args.get(3))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = roadLine4.buildVehicle(60)) != null)
+            movingObjectsLayer.add(m);
+
 
         roadLine5.update(deltaMs);
-        if ((m = roadLine5.buildVehicle(args.get(1), args.get(2), args.get(3))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = roadLine5.buildVehicle(40)) != null)
+            movingObjectsLayer.add(m);
+
 
         /* River traffic updates */
         riverLine1.update(deltaMs);
-        if ((m = riverLine1.buildShortLogWithTurtles(40, args.get(2), args.get(5), args.get(6))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = riverLine1.buildShortLogWithTurtles(40)) != null)
+            movingObjectsLayer.add(m);
+
 
         riverLine2.update(deltaMs);
-        if ((m = riverLine2.buildLongLogWithCrocodile(30, args.get(2), args.get(4))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = riverLine2.buildLongLogWithCrocodile(30)) != null)
+            movingObjectsLayer.add(m);
+
 
         riverLine3.update(deltaMs);
-        if ((m = riverLine3.buildShortLogWithTurtles(50, args.get(2), args.get(5), args.get(6))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = riverLine3.buildShortLogWithTurtles(50)) != null)
+            movingObjectsLayer.add(m);
+
+
 
         riverLine4.update(deltaMs);
-        if ((m = riverLine4.buildLongLogWithCrocodile(20, args.get(2), args.get(4))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = riverLine4.buildLongLogWithCrocodile(20)) != null)
+            movingObjectsLayer.add(m);
+
 
         riverLine5.update(deltaMs);
-        if ((m = riverLine5.buildShortLogWithTurtles(10, args.get(2), args.get(5), args.get(6))) != null)
-            synchronized (this) {
-                movingObjectsLayer.add(m);
-            }
+        if ((m = riverLine5.buildShortLogWithTurtles(10)) != null)
+            movingObjectsLayer.add(m);
+
 
         // Do Wind
-        if ((m = wind.genParticles(GameLevel, args.get(7), args.get(8), argsDouble.get(0), argsDouble.get(1))) != null)
-            synchronized (this) {
-                particleLayer.add(m);
-            }
+        if ((m = wind.genParticles(GameLevel)) != null)
+            particleLayer.add(m);
+
 
         // HeatWave
-        if ((m = hwave.genParticles(frog.getCenterPosition(), args.get(9), argsDouble.get(2), argsDouble.get(3))) != null)
-            synchronized (this) {
-                particleLayer.add(m);
-            }
+        if ((m = hwave.genParticles(frog.getCenterPosition())) != null)
+            particleLayer.add(m);
 
-        synchronized (this) {
-            movingObjectsLayer.update(deltaMs);
-            particleLayer.update(deltaMs);
-        }
+
+        movingObjectsLayer.update(deltaMs);
+        particleLayer.update(deltaMs);
+
     }
 
 
@@ -335,8 +295,6 @@ public class Main extends StaticScreenGame {
             GameLevel = 10;
             initializeLevel(GameLevel);
         }
-
-
         /*
          * This logic checks for key strokes.
          * It registers a key press, and ignores all other key strokes
@@ -364,6 +322,7 @@ public class Main extends StaticScreenGame {
                 listenInput = false;
         }
 
+
         if (keyReleased) {
             listenInput = true;
             keyPressed = false;
@@ -373,8 +332,9 @@ public class Main extends StaticScreenGame {
             GameState = GAME_INTRO;
     }
 
-    public synchronized void froggerHandler() throws RemoteException {
+    public synchronized void froggerHandler() {
         String[] msg = observer.getReceivedMessage().split(" ");
+        System.out.println(observer.getReceivedMessage());
         switch (msg[1]) {
             case "upPressed":
                 if (msg[0].equals("0"))
@@ -444,7 +404,7 @@ public class Main extends StaticScreenGame {
      */
     public void finishLevelKeyboardHandler() throws RemoteException {
         keyboard.poll();
-        if (keyboard.isPressed(KeyEvent.VK_SPACE)) {
+        if (keyboard.isPressed(KeyEvent.VK_SPACE) || space_has_been_released) {
             GameState = GAME_PLAY;
             audiofx.playGameMusic();
             audiofxP2.playGameMusic();
@@ -462,7 +422,7 @@ public class Main extends StaticScreenGame {
                 try {
                     froggerKeyboardHandler();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
                 wind.update(deltaMs);
                 hwave.update(deltaMs);
@@ -471,13 +431,8 @@ public class Main extends StaticScreenGame {
                 audiofx.update(deltaMs);
                 ui.update(deltaMs);
 
-                try {
-                    if (observer.getUsername().equals("0")) cycleTrafficState();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                cycleTraffic(4);
+
                 synchronized (this) {
                     frogCol.testCollision(movingObjectsLayer);
                     frogColP2.testCollision(movingObjectsLayer);
@@ -503,19 +458,26 @@ public class Main extends StaticScreenGame {
                     hwave.start(frogP2, GameLevel);
                 hwave.perform(frogP2, deltaMs, GameLevel);
 
-            synchronized (this) {
-                if (!frog.isAlive)
-                    synchronized (this){particleLayer.clear();}
+                synchronized (this) {
+                    if (!frog.isAlive)
+                        synchronized (this) {
+                            particleLayer.clear();
+                        }
 
-                if (!frogP2.isAlive)
-                    synchronized (this){particleLayer.clear();}
-            }
+                    if (!frogP2.isAlive)
+                        synchronized (this) {
+                            particleLayer.clear();
+                        }
+                }
+
                 goalmanager.update(deltaMs);
 
                 if (goalmanager.getUnreached().size() == 0) {
                     GameState = GAME_FINISH_LEVEL;
                     audiofx.playCompleteLevel();
-                    synchronized (this){particleLayer.clear();}
+                    synchronized (this) {
+                        particleLayer.clear();
+                    }
                 }
 
                 /*
@@ -535,15 +497,7 @@ public class Main extends StaticScreenGame {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-                try {
-                    if (observer.getUsername().equals("0")) {
-                        cycleTrafficState();
-                    }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                cycleTraffic(4);
                 break;
 
             case GAME_FINISH_LEVEL:
@@ -567,24 +521,30 @@ public class Main extends StaticScreenGame {
                 backgroundLayer.render(rc);
 
                 if (frog.isAlive) {
+
                     synchronized (this) {
                         movingObjectsLayer.render(rc);
                     }
+
                     //frog.collisionObjects.get(0).render(rc);
                     frog.render(rc);
                     frogP2.render(rc);
                 } else {
                     frog.render(rc);
                     frogP2.render(rc);
+
                     synchronized (this) {
                         movingObjectsLayer.render(rc);
                     }
+
                 }
 
-                synchronized (this){particleLayer.render(rc);}
-                if (this.observer.getUsername().equals("0")){
+                synchronized (this) {
+                    particleLayer.clear();
+                }
+                if (this.observer.getUsername().equals("0")) {
                     ui.render(rc, frog.getFROGGER_LIVES());
-                } else if (this.observer.getUsername().equals("1")){
+                } else if (this.observer.getUsername().equals("1")) {
                     ui.render(rc, frogP2.getFROGGER_LIVES());
                 }
 
@@ -594,12 +554,14 @@ public class Main extends StaticScreenGame {
             case GAME_INSTRUCTIONS:
             case GAME_INTRO:
                 backgroundLayer.render(rc);
+
                 synchronized (this) {
                     movingObjectsLayer.render(rc);
                 }
-                if (this.observer.getUsername().equals("0")){
+
+                if (this.observer.getUsername().equals("0")) {
                     ui.render(rc, frog.getFROGGER_LIVES());
-                } else if (this.observer.getUsername().equals("1")){
+                } else if (this.observer.getUsername().equals("1")) {
                     ui.render(rc, frogP2.getFROGGER_LIVES());
                 }
                 break;

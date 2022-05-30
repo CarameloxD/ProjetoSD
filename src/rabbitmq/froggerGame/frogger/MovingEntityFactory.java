@@ -76,7 +76,8 @@ public class MovingEntityFactory {
 
     /**
      * Building basic moving object {car, truck, short log, long log}
-     * @param type - {CAR, TRUCK, SLOG, LLOG}
+     *
+     * @param type   - {CAR, TRUCK, SLOG, LLOG}
      * @param chance - of production (n out of 100)
      * @return MovingEntity on chance of success, otherwise return null
      * chance gives some holes in the production pattern, looks better.
@@ -116,6 +117,7 @@ public class MovingEntityFactory {
 
     /**
      * Long Tree Logs with a some chance of Crocodile!
+     *
      * @return
      */
     public MovingEntity buildLongLogWithCrocodile(int chance, int basicBuildObject, int crocodile) {
@@ -128,6 +130,7 @@ public class MovingEntityFactory {
     /**
      * Cars appear more often than trucks
      * If traffic line is clear, send a faaast CopCar!
+     *
      * @return
      */
     public MovingEntity buildVehicle(int buildVehicle, int buildBasicObject, int car) {

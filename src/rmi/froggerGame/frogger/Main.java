@@ -466,7 +466,7 @@ public class Main extends StaticScreenGame {
      */
     public void finishLevelKeyboardHandler() throws RemoteException {
         keyboard.poll();
-        if (keyboard.isPressed(KeyEvent.VK_SPACE)) {
+        if (keyboard.isPressed(KeyEvent.VK_SPACE) || space_has_been_released) {
             GameState = GAME_PLAY;
             audiofx.playGameMusic();
             audiofxP2.playGameMusic();

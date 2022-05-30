@@ -14,6 +14,7 @@
 package rabbitmq.froggerGame.client;
 
 import com.rabbitmq.client.BuiltinExchangeType;
+import org.json.JSONObject;
 import rabbitmq.froggerGame.frogger.Main;
 import rabbitmq.froggerGame.server.Game;
 import rabbitmq.util.RabbitUtils;
@@ -39,54 +40,71 @@ public class ObserverGuiClient extends javax.swing.JFrame {
      *
      * @param args
      */
-    public ObserverGuiClient(String args[]) {
+    public ObserverGuiClient(String args[]) throws IOException {
+
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, " After initComponents()...");
+
+        RabbitUtils.printArgs(args);
+
+        //Read args passed via shell command
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+        String exchangeName = args[2];
+        //String room=args[3];
+        String user = args[3];
+        //String general=args[5];
+        String game = args[4];
+        String gameDifficulty = args[5];
+
+        Main f = null;
         try {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, " After initComponents()...");
-
-            RabbitUtils.printArgs(args);
-
-            //Read args passed via shell command
-            String host=args[0];
-            int port=Integer.parseInt(args[1]);
-            String exchangeName=args[2];
-            //String room=args[3];
-            String user=args[3];
-            //String general=args[5];
-            String game=args[4];
-            int gameDifficulty= Integer.parseInt(args[5]);
-
-            Main f = new Main(gameDifficulty);
-
-            //2. Create the _05_observer object that manages send/receive of messages to/from rabbitmq
-            this.observer= new Observer(f, host, port, "guest", "guest", user, game,exchangeName, BuiltinExchangeType.FANOUT, "UTF-8");
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, " After initObserver()...");
-
-            f.setObserver(this.observer);
-
-            f.run();
-
-        } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
+            f = new Main(transformDifficulty(gameDifficulty));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
 
+        //2. Create the _05_observer object that manages send/receive of messages to/from rabbitmq
+        try {
+            observer = new Observer(f, host, port, "guest", "guest", user, game, "cycleTraffic", "froggerMoves", exchangeName, BuiltinExchangeType.FANOUT, "UTF-8");
+        } catch (IOException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, " After initObserver()...");
+
+        f.setObserver(observer);
+
+        observer.sendMessage("initialize");
+        while (observer.getReceivedMessage() == null || !observer.getReceivedMessage().equals("2")) {
+        }
+
+        f.run();
+
+    }
 
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                int expectedArgs = 4;
-                if (args.length >= expectedArgs) {
-                    new ObserverGuiClient(args).setVisible(true);
-                } else {
-                    Logger.getLogger(ObserverGuiClient.class.getName()).log(Level.INFO, "check args.length < "+expectedArgs+"!!!" );
-                }
-            }
-        });
+    public static void main(String args[]) throws IOException {
+        new ObserverGuiClient(args);
     }
 
+    public int transformDifficulty(String d) {
+        int num;
+        switch (d) {
+            case "easy":
+                num = 1;
+                break;
+            case "normal":
+                num = 2;
+                break;
+            case "hard":
+                num = 3;
+                break;
+            default:
+                System.out.println("Invalid Option");
+                num = 0;
+        }
+        return num;
+    }
 }
