@@ -71,7 +71,7 @@ public class Observer {
     }
 
     /**
-     * Creates a Consumer associated with an unnamed queue.
+     * Creates a Consumer associated with an unnamed queue.**
      */
     public void attachConsumerToChannelExchangeWithKey() {
         try {

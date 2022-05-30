@@ -61,7 +61,7 @@ public class MovingEntityFactory {
         position = pos;
         velocity = v;
         //r = new Random(System.currentTimeMillis());
-
+        r = new Random(1);
         //r = new Random(50);
 
         creationRate[CAR] = (int) Math.round(((Car.LENGTH) + padding + 32) /
@@ -82,15 +82,15 @@ public class MovingEntityFactory {
      * @return MovingEntity on chance of success, otherwise return null
      * chance gives some holes in the production pattern, looks better.
      */
-    public MovingEntity buildBasicObject(int type, int chance, int buildBasicObject, int car) {
+    public MovingEntity buildBasicObject(int type, int chance) {
         if (updateMs > rateMs) {
             updateMs = 0;
 
-            if (buildBasicObject < chance)
+            if (r.nextInt(100) < chance)
                 switch (type) {
                     case 0: // CAR
                         rateMs = creationRate[CAR];
-                        return new Car(position, velocity, car);
+                        return new Car(position, velocity, r.nextInt(Car.TYPES));
                     case 1: // TRUCK
                         rateMs = creationRate[TRUCK];
                         return new Truck(position, velocity);
@@ -108,10 +108,10 @@ public class MovingEntityFactory {
         return null;
     }
 
-    public MovingEntity buildShortLogWithTurtles(int chance, int basicBuildObject,int turtle, int turtleif) {
-        MovingEntity m = buildBasicObject(SLOG, 80, basicBuildObject, 0);
-        if (m != null && turtleif < chance)
-            return new Turtles(position, velocity, turtle);
+    public MovingEntity buildShortLogWithTurtles(int chance) {
+        MovingEntity m = buildBasicObject(SLOG, 80);
+        if (m != null && r.nextInt(100) < chance)
+            return new Turtles(position, velocity, r.nextInt(2));
         return m;
     }
 
@@ -120,9 +120,9 @@ public class MovingEntityFactory {
      *
      * @return
      */
-    public MovingEntity buildLongLogWithCrocodile(int chance, int basicBuildObject, int crocodile) {
-        MovingEntity m = buildBasicObject(LLOG, 80, basicBuildObject, 0);
-        if (m != null && crocodile < chance)
+    public MovingEntity buildLongLogWithCrocodile(int chance) {
+        MovingEntity m = buildBasicObject(LLOG, 80);
+        if (m != null && r.nextInt(100) < chance)
             return new Crocodile(position, velocity);
         return m;
     }
@@ -133,15 +133,12 @@ public class MovingEntityFactory {
      *
      * @return
      */
-    public MovingEntity buildVehicle(int buildVehicle, int buildBasicObject, int car) {
-        // Build slightly more cars that trucks
-        MovingEntity m = buildVehicle < 80 ? buildBasicObject(CAR, 50, buildBasicObject, car) : buildBasicObject(TRUCK, 50, buildBasicObject, car);
+    public MovingEntity buildVehicle(int chance) {
 
+        MovingEntity m = buildBasicObject(CAR, 80);
+        if (m != null && r.nextInt(100) < chance)
+            return new Truck(position, velocity);
         if (m != null) {
-
-            /* If the road line is clear, that is there are no cars or truck on it
-             * then send in a high speed cop car
-             */
             if (Math.abs(velocity.getX() * copCarDelay) > Main.WORLD_WIDTH) {
                 copCarDelay = 0;
                 return new CopCar(position, velocity.scale(5));
