@@ -335,29 +335,29 @@ public class Main extends StaticScreenGame {
     public synchronized void froggerHandler() {
         String[] msg = observer.getReceivedMessage().split(" ");
         System.out.println(observer.getReceivedMessage());
-        switch (msg[1]) {
+        switch (msg[2]) {
             case "upPressed":
-                if (msg[0].equals("0"))
+                if (msg[1].equals("0"))
                     frog.moveUp();
-                else if (msg[0].equals("1"))
+                else if (msg[1].equals("1"))
                     frogP2.moveUp();
                 break;
             case "downPressed":
-                if (msg[0].equals("0"))
+                if (msg[1].equals("0"))
                     frog.moveDown();
-                else if (msg[0].equals("1"))
+                else if (msg[1].equals("1"))
                     frogP2.moveDown();
                 break;
             case "rightPressed":
-                if (msg[0].equals("0"))
+                if (msg[1].equals("0"))
                     frog.moveRight();
-                else if (msg[0].equals("1"))
+                else if (msg[1].equals("1"))
                     frogP2.moveRight();
                 break;
             case "leftPressed":
-                if (msg[0].equals("0"))
+                if (msg[1].equals("0"))
                     frog.moveLeft();
-                else if (msg[0].equals("1"))
+                else if (msg[1].equals("1"))
                     frogP2.moveLeft();
                 break;
         }

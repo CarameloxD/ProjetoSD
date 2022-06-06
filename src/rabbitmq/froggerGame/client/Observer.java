@@ -58,16 +58,7 @@ public class Observer {
 
         String[] bindingKeys = {};
         this.exchangeBindingKeys = bindingKeys;
-        bindExchangeToChannelRabbitMQ();
         attachConsumerToChannelExchangeWithKey();
-    }
-
-    /**
-     * Binds the channel to given exchange name and type.
-     */
-    private void bindExchangeToChannelRabbitMQ() throws IOException {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Declaring Exchange '" + this.exchangeName + "' with type " + this.exchangeType);
-        //this.channelToRabbitMq.exchangeDeclare(exchangeName, exchangeType);
     }
 
     /**
@@ -77,7 +68,7 @@ public class Observer {
         try {
             String queueName = this.channelToRabbitMq.queueDeclare().getQueue();
 
-            this.channelToRabbitMq.queueBind(queueName, exchangeName + "Server", "");
+            this.channelToRabbitMq.queueBind(queueName, exchangeName + "Server_" + this.game, "");
 
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, " Created consumerChannel bound to Exchange " + this.exchangeName + "...");
 
@@ -115,7 +106,7 @@ public class Observer {
         //RoutingKey will be ignored by FANOUT exchange
         BasicProperties prop = MessageProperties.PERSISTENT_TEXT_PLAIN;
         String[] msg = msgToSend.split(" ");
-        channelToRabbitMq.basicPublish(exchangeName, "", null, msgToSend.getBytes("UTF-8"));
+        this.channelToRabbitMq.basicPublish("", "FroggerWorkerQueue", MessageProperties.PERSISTENT_TEXT_PLAIN, (this.game + " " + msgToSend).getBytes());
     }
 
     /**

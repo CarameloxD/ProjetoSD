@@ -73,8 +73,9 @@ public class ObserverGuiClient extends javax.swing.JFrame {
 
         f.setObserver(observer);
 
-        observer.sendMessage("initialize");
-        while (observer.getReceivedMessage() == null || !observer.getReceivedMessage().equals("2")) {
+        observer.sendMessage("initialize" + observer.getUsername());
+        while (observer.getReceivedMessage() == null || !observer.getReceivedMessage().contains("initialize0")) {
+            System.out.println(observer.getReceivedMessage());
         }
 
         f.run();

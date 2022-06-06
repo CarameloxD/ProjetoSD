@@ -58,9 +58,8 @@ public class Server {
     }
 
     private void bindExchangeToChannelRabbitMQ() throws IOException {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Declaring Exchange '" + this.exchangeName + "Server" + "' with type " + this.exchangeType);
-        this.channelToRabbitMq.exchangeDeclare(exchangeName + "Server", exchangeType);
-        this.channelToRabbitMq.exchangeDeclare(exchangeName, BuiltinExchangeType.FANOUT);
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Declaring Exchange '" + this.exchangeName + "Server_" + this.game + "' with type " + this.exchangeType);
+        this.channelToRabbitMq.exchangeDeclare(exchangeName + "Server_" + this.game, exchangeType);
     }
 
     /**
@@ -68,30 +67,37 @@ public class Server {
      */
     public void attachConsumerToChannelExchangeWithKey() {
         try {
-            String queueName = this.channelToRabbitMq.queueDeclare().getQueue();
+            boolean durable=true;
+            this.channelToRabbitMq.queueDeclare("FroggerWorkerQueue", durable, false, false, null);
 
-            this.channelToRabbitMq.queueBind(queueName, exchangeName, "");
+            System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, " Created consumerChannel bound to Exchange " + this.exchangeName + "...");
+            int prefetchCount = 1;
+            this.channelToRabbitMq.basicQos(prefetchCount);
 
-            /* Use a DeliverCallback lambda function instead of DefaultConsumer to receive messages from queue;
-               DeliverCallback is an interface which provides a single method:
-                void handle(String tag, Delivery delivery) throws IOException; */
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            DeliverCallback deliverCallback=(consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), "UTF-8");
+                System.out.println(" [x] Received '" + message + "'");
                 String[] msg = message.split(" ");
-                //Store the received message
                 setReceivedMessage(message);
-                //System.out.println(" [x] Consumer Tag [" + consumerTag + "] - Received '" + message + "'");
-               if (msg[0].equals("0") || msg[0].equals("1")) {
+                if (msg[1].equals("0") || msg[1].equals("1")) {
                     this.sendMessage(message);
-               } else if (message.contains("initialize")) addnPlayers();
-               //this.gui.updateTextArea();
+                } else if (message.contains("initialize0")) {
+                    sendMessage(message);
+                }
+
+                try {
+                    doWork(message);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println(" [x] Done processing task");
+                    this.channelToRabbitMq.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                }
             };
-            CancelCallback cancelCallback = consumerTag -> {
-                System.out.println(" [x] Consumer Tag [" + consumerTag + "] - Cancel Callback invoked!");
-            };
-            this.channelToRabbitMq.basicConsume(queueName, true, deliverCallback, cancelCallback);
+            CancelCallback cancelCallback = consumerTag -> System.out.println(" [x] Consumer Tag [" + consumerTag + "] - Cancel Callback invoked!");
+            boolean autoAck = false;
+            this.channelToRabbitMq.basicConsume("FroggerWorkerQueue", autoAck, deliverCallback, consumerTag -> { });
         } catch (Exception e) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.toString());
         }
@@ -107,7 +113,7 @@ public class Server {
         //RoutingKey will be ignored by FANOUT exchange
         BasicProperties prop = MessageProperties.PERSISTENT_TEXT_PLAIN;
         String[] msg = msgToSend.split(" ");
-        channelToRabbitMq.basicPublish(exchangeName + "Server", "", null, msgToSend.getBytes("UTF-8"));
+        channelToRabbitMq.basicPublish(exchangeName + "Server_" + msg[0], "", null, msgToSend.getBytes("UTF-8"));
     }
 
     /**
@@ -127,5 +133,13 @@ public class Server {
     public void addnPlayers() throws IOException {
         this.nplayers++;
         this.sendMessage(String.valueOf(nplayers));
+    }
+
+    private static void doWork(String task) throws InterruptedException {
+        for (char ch : task.toCharArray()) {
+            if (ch == '.') {
+                Thread.sleep(1000);
+            }
+        }
     }
 }
